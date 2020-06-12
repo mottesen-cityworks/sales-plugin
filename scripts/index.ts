@@ -1,5 +1,4 @@
 import * as Core from '../typescript/bundles/core';
-import * as ServiceInterface from '../typescript/bundles/service-interfaces';
 import { AuthenticationService, ApiService, IApiService } from '../typescript/api/services/General/AuthenticationService';
 import { WorkOrderService } from '../typescript/api/services/Ams/WorkOrderService';
 import { InspectionService } from '../typescript/api/services/Ams/InspectionService';
@@ -15,27 +14,36 @@ class SalesWorkHistory {
     clearListElement: HTMLElement;
     constructor() {
         //Create a new api service for Testing
-        
+        /*
         let apiService: IApiService = new ApiService("https://cloud01.cityworks.com/_SME_KSMMS_CURRENT_mottesen");
         apiService.login("pwadmin1", "pwadmin1").then((authResponse) => {
             console.log(authResponse.Value);
-        })        
+        });
+        */        
 
-        /*
+        
         let apiService: IApiService = new ApiService(window.myGlobalServerUrl);
         apiService.initializeCsrfToken();
-        */
+        
         this.authService = new AuthenticationService(apiService);
         this.woService = new WorkOrderService(apiService);
         this.inspService = new InspectionService(apiService);
         this.srService = new ServiceRequestService(apiService);
 
+        let createBtn = document.getElementById('create-button');
 
+        let createList = document.getElementById('new-work-activities');
+        
         let clearBtn = document.getElementById('clear-button');
         clearBtn.addEventListener('click', (e: Event) => this.clear());
 
         let clearList = document.getElementById('cleared-work-activities');
         this.clearListElement = clearList;
+
+        let emptyClearList = document.getElementById('empty-clear-list');
+        emptyClearList.addEventListener('click', (e: Event)=>{
+            $(clearList).empty();
+        });
 
         let appSwitcherBtn = document.getElementById('app-switcher-button');
         appSwitcherBtn.addEventListener('click', (e: Event) => this.appSwitcher(e));

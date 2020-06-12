@@ -12,6 +12,7 @@
   "author": "Mitchell Ottesen",
   "license": "ISC",
   "dependencies": {
+    "@types/jquery": "^3.3.38",
     "typescript": "^2.0.10"
   }
 }

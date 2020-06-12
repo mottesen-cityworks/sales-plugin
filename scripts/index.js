@@ -3,23 +3,29 @@ define(["require", "exports", '../typescript/api/services/General/Authentication
     var SalesWorkHistory = (function () {
         function SalesWorkHistory() {
             //Create a new api service for Testing
-            var _this = this;
-            var apiService = new AuthenticationService_1.ApiService("https://cloud01.cityworks.com/_SME_KSMMS_CURRENT_mottesen");
-            apiService.login("pwadmin1", "pwadmin1").then(function (authResponse) {
+            /*
+            let apiService: IApiService = new ApiService("https://cloud01.cityworks.com/_SME_KSMMS_CURRENT_mottesen");
+            apiService.login("pwadmin1", "pwadmin1").then((authResponse) => {
                 console.log(authResponse.Value);
             });
-            /*
-            let apiService: IApiService = new ApiService(window.myGlobalServerUrl);
-            apiService.initializeCsrfToken();
             */
+            var _this = this;
+            var apiService = new AuthenticationService_1.ApiService(window.myGlobalServerUrl);
+            apiService.initializeCsrfToken();
             this.authService = new AuthenticationService_1.AuthenticationService(apiService);
             this.woService = new WorkOrderService_1.WorkOrderService(apiService);
             this.inspService = new InspectionService_1.InspectionService(apiService);
             this.srService = new ServiceRequestService_1.ServiceRequestService(apiService);
+            var createBtn = document.getElementById('create-button');
+            var createList = document.getElementById('new-work-activities');
             var clearBtn = document.getElementById('clear-button');
             clearBtn.addEventListener('click', function (e) { return _this.clear(); });
             var clearList = document.getElementById('cleared-work-activities');
             this.clearListElement = clearList;
+            var emptyClearList = document.getElementById('empty-clear-list');
+            emptyClearList.addEventListener('click', function (e) {
+                $(clearList).empty();
+            });
             var appSwitcherBtn = document.getElementById('app-switcher-button');
             appSwitcherBtn.addEventListener('click', function (e) { return _this.appSwitcher(e); });
         }
