@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Sales Work History Management</title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+	<!-- jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+	<!-- Latest compiled JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+	<script src="./scripts/require.js"></script>
+	<script>myGlobalServerUrl = '<?=server.root=?>';</script>
+	<script>require(["./scripts/index.js"])</script>
+</head>
+<body>
+	<nav class="navbar navbar-default">
+		<div class="container-fluid">
+			<a class="navbar-brand"> <button class="btn btn-lg btn-outline-secondary"
+					id="app-switcher-button">Apps</button></a>
+			<ul class="nav navbar-nav navbar-right">
+				<li><img class="pull-right"
+						src="https://www.cityworks.com/wp-content/themes/cityworks/assets/images/city_worklogo.svg"
+						height="75"></li>
+			</ul>
+		</div>
+	</nav>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6">
+				<h2>Created Activities</h2>
+				<ul class="list-group" id="new-work-activities"></ul>
+				<button class="btn btn-lg btn-primary" id="create-button">Create Work History</button>
+			</div>
+
+			<div class="col-md-6">
+				<h2>Cleared Activities</h2>
+				<ul class="list-group" id="cleared-work-activities"></ul>
+				<button class="btn btn-lg btn-primary" id="clear-button">Clear Work History</button>
+			</div>
+		</div>
+	</div>
+	</div>
+</body>
+</html>

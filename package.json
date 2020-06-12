@@ -1,0 +1,17 @@
+{
+  "name": "sales-plugin",
+  "version": "1.0.0",
+  "description": "Simple plugin to manage work history for Sales Demo Cityworks sites",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mitchell Ottesen",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^2.0.10"
+  }
+}
