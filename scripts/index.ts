@@ -19,7 +19,7 @@ class SalesWorkHistory {
         apiService.login("pwadmin1", "pwadmin1").then((authResponse) => {
             console.log(authResponse.Value);
         });
-        */        
+        */
 
         
         let apiService: IApiService = new ApiService(window.myGlobalServerUrl);
@@ -33,7 +33,7 @@ class SalesWorkHistory {
         let createBtn = document.getElementById('create-button');
 
         let createList = document.getElementById('new-work-activities');
-        
+
         let clearBtn = document.getElementById('clear-button');
         clearBtn.addEventListener('click', (e: Event) => this.clear());
 
@@ -41,7 +41,7 @@ class SalesWorkHistory {
         this.clearListElement = clearList;
 
         let emptyClearList = document.getElementById('empty-clear-list');
-        emptyClearList.addEventListener('click', (e: Event)=>{
+        emptyClearList.addEventListener('click', (e: Event) => {
             $(clearList).empty();
         });
 
@@ -62,48 +62,50 @@ class SalesWorkHistory {
             this.woService.Search({ Status: stringArray }).then((response) => {
                 let workorderIds = response.Value;
                 workorderIds.forEach((woid) => {
-                    // Try to close
-                    this.woService.Close({ WorkOrderIds: [woid] }).then((response) => {
-                        if (response.Status !== 0 || response.ErrorMessages.length > 0) {
-                            // Cancel instead
-                            this.woService.Cancel({ WorkOrderIds: [woid], CancelReason: "Cleaning house", DateCancelled: new Date() }).then((response) => {
-                                if (response.Status !== 0) {
-                                    //Delete WO
-                                    this.woService.ById({ WorkOrderId: woid }).then((response) => {
-                                        let woBase = response.Value;
-                                        this.woService.Delete({ WorkOrderSids: [woBase.WorkOrderSid] }).then((response) => {
-                                            if (response.Status === 0 && response.Value) {
-                                                //Notify user of Deleted WO
-                                                let listMessage = document.createElement('li');
-                                                listMessage.className = 'list-group-item';
-                                                listMessage.appendChild(document.createTextNode(`Work Order ${response.Value[0]} Deleted`));
-                                                this.clearListElement.appendChild(listMessage);
-                                            }
-                                        })
+                    this.woService.Update({ WorkOrderId: woid, CycleType: '0' }).then((response) => {
+                        if (response.Value.CycleType === Core.Enums.RepeatType.NEVER) {
+                            // Try to close
+                            this.woService.Close({ WorkOrderIds: [woid] }).then((response) => {
+                                if (response.Status !== 0 || response.ErrorMessages.length > 0) {
+                                    // Cancel instead
+                                    this.woService.Cancel({ WorkOrderIds: [woid], CancelReason: "Cleaning house", DateCancelled: new Date() }).then((response) => {
+                                        if (response.Status !== 0) {
+                                            //Delete WO
+                                            this.woService.ById({ WorkOrderId: woid }).then((response) => {
+                                                let woBase = response.Value;
+                                                this.woService.Delete({ WorkOrderSids: [woBase.WorkOrderSid] }).then((response) => {
+                                                    if (response.Status === 0 && response.Value) {
+                                                        //Notify user of Deleted WO
+                                                        let listMessage = document.createElement('li');
+                                                        listMessage.className = 'list-group-item';
+                                                        listMessage.appendChild(document.createTextNode(`Work Order ${response.Value[0]} Deleted`));
+                                                        this.clearListElement.appendChild(listMessage);
+                                                    }
+                                                })
+                                            })
+                                        }
+
+                                        else {
+                                            //Notify user of Cancelled WO
+                                            let listMessage = document.createElement('li');
+                                            listMessage.className = 'list-group-item';
+                                            listMessage.appendChild(document.createTextNode(`Work Order ${woid} Cancelled`));
+                                            this.clearListElement.appendChild(listMessage);
+                                        }
                                     })
                                 }
 
                                 else {
-                                    //Notify user of Cancelled WO
+                                    //notify user of Closed work order
                                     let listMessage = document.createElement('li');
                                     listMessage.className = 'list-group-item';
-                                    listMessage.appendChild(document.createTextNode(`Work Order ${woid} Cancelled`));
+                                    listMessage.appendChild(document.createTextNode(`Work Order ${woid} Closed`));
                                     this.clearListElement.appendChild(listMessage);
                                 }
                             })
                         }
-
-                        else {
-                            //notify user of Closed work order
-                            let listMessage = document.createElement('li');
-                            listMessage.className = 'list-group-item';
-                            listMessage.appendChild(document.createTextNode(`Work Order ${woid} Closed`));
-                            this.clearListElement.appendChild(listMessage);
-                        }
-
                     })
                 })
-
             })
         });
 
@@ -118,44 +120,51 @@ class SalesWorkHistory {
             })
             this.inspService.Search({ Status: inspStatusArray }).then((response) => {
                 response.Value.forEach((inspId) => {
-                    // Try to Close
-                    this.inspService.Close({ InspectionIds: [inspId] }).then((response) => {
-                        if (response.Status !== 0 || response.ErrorMessages.length > 0) {
-                            // Cancel instead
-                            this.inspService.Cancel({ InspectionIds: [inspId], CancelReason: "Cleaning house", DateCancelled: new Date() }).then((response) => {
-                                if (response.Status !== 0) {
-                                    //Delete
-                                    this.inspService.Delete({ InspectionIds: [inspId] }).then((response) => {
-                                        if (response.Status === 0) {
-                                            //Notify user of Deleted Inspection
+                    // Set recurring to never
+                    this.inspService.Update({ InspectionId: inspId, CycleType: '0' }).then((response) => {
+                        if (response.Value.CycleType === Core.Enums.RepeatType.NEVER) {
+                            // Try to Close
+                            this.inspService.Close({ InspectionIds: [inspId] }).then((response) => {
+                                if (response.Status !== 0 || response.ErrorMessages.length > 0) {
+                                    // Cancel instead
+                                    this.inspService.Cancel({ InspectionIds: [inspId], CancelReason: "Cleaning house", DateCancelled: new Date() }).then((response) => {
+                                        if (response.Status !== 0) {
+                                            //Delete
+                                            this.inspService.Delete({ InspectionIds: [inspId] }).then((response) => {
+                                                if (response.Status === 0) {
+                                                    //Notify user of Deleted Inspection
+                                                    let listMessage = document.createElement('li');
+                                                    listMessage.className = 'list-group-item';
+                                                    listMessage.appendChild(document.createTextNode(`Inspection ${inspId} Deleted`));
+                                                    this.clearListElement.appendChild(listMessage);
+                                                }
+                                            })
+                                        }
+
+                                        else {
+                                            //Notify user of Cancelled Inspection
                                             let listMessage = document.createElement('li');
                                             listMessage.className = 'list-group-item';
-                                            listMessage.appendChild(document.createTextNode(`Inspection ${inspId} Deleted`));
+                                            listMessage.appendChild(document.createTextNode(`Inspection ${inspId} Cancelled`));
                                             this.clearListElement.appendChild(listMessage);
                                         }
                                     })
                                 }
 
                                 else {
-                                    //Notify user of Cancelled Inspection
+                                    //Notify user of Closed Inspection
                                     let listMessage = document.createElement('li');
                                     listMessage.className = 'list-group-item';
-                                    listMessage.appendChild(document.createTextNode(`Inspection ${inspId} Cancelled`));
+                                    listMessage.appendChild(document.createTextNode(`Inspection ${inspId} Closed`));
                                     this.clearListElement.appendChild(listMessage);
                                 }
                             })
                         }
 
-                        else {
-                            //Notify user of Closed Inspection
-                            let listMessage = document.createElement('li');
-                            listMessage.className = 'list-group-item';
-                            listMessage.appendChild(document.createTextNode(`Inspection ${inspId} Closed`));
-                            this.clearListElement.appendChild(listMessage);
-                        }
                     })
                 })
             })
+
         })
 
         //Process Service Requests
