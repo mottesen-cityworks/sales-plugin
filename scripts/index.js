@@ -1,4 +1,4 @@
-define(["require", "exports", '../typescript/api/services/General/AuthenticationService', '../typescript/api/services/Ams/WorkOrderService', '../typescript/api/services/Ams/InspectionService', '../typescript/api/services/Ams/ServiceRequestService'], function (require, exports, AuthenticationService_1, WorkOrderService_1, InspectionService_1, ServiceRequestService_1) {
+define(["require", "exports", '../typescript/bundles/core', '../typescript/api/services/General/AuthenticationService', '../typescript/api/services/Ams/WorkOrderService', '../typescript/api/services/Ams/InspectionService', '../typescript/api/services/Ams/ServiceRequestService'], function (require, exports, Core, AuthenticationService_1, WorkOrderService_1, InspectionService_1, ServiceRequestService_1) {
     "use strict";
     var SalesWorkHistory = (function () {
         function SalesWorkHistory() {
@@ -43,41 +43,45 @@ define(["require", "exports", '../typescript/api/services/General/Authentication
                 _this.woService.Search({ Status: stringArray }).then(function (response) {
                     var workorderIds = response.Value;
                     workorderIds.forEach(function (woid) {
-                        // Try to close
-                        _this.woService.Close({ WorkOrderIds: [woid] }).then(function (response) {
-                            if (response.Status !== 0 || response.ErrorMessages.length > 0) {
-                                // Cancel instead
-                                _this.woService.Cancel({ WorkOrderIds: [woid], CancelReason: "Cleaning house", DateCancelled: new Date() }).then(function (response) {
-                                    if (response.Status !== 0) {
-                                        //Delete WO
-                                        _this.woService.ById({ WorkOrderId: woid }).then(function (response) {
-                                            var woBase = response.Value;
-                                            _this.woService.Delete({ WorkOrderSids: [woBase.WorkOrderSid] }).then(function (response) {
-                                                if (response.Status === 0 && response.Value) {
-                                                    //Notify user of Deleted WO
-                                                    var listMessage = document.createElement('li');
-                                                    listMessage.className = 'list-group-item';
-                                                    listMessage.appendChild(document.createTextNode("Work Order " + response.Value[0] + " Deleted"));
-                                                    _this.clearListElement.appendChild(listMessage);
-                                                }
-                                            });
+                        _this.woService.Update({ WorkOrderId: woid, CycleType: '0' }).then(function (response) {
+                            if (response.Value.CycleType === Core.Enums.RepeatType.NEVER) {
+                                // Try to close
+                                _this.woService.Close({ WorkOrderIds: [woid] }).then(function (response) {
+                                    if (response.Status !== 0 || response.ErrorMessages.length > 0) {
+                                        // Cancel instead
+                                        _this.woService.Cancel({ WorkOrderIds: [woid], CancelReason: "Cleaning house", DateCancelled: new Date() }).then(function (response) {
+                                            if (response.Status !== 0) {
+                                                //Delete WO
+                                                _this.woService.ById({ WorkOrderId: woid }).then(function (response) {
+                                                    var woBase = response.Value;
+                                                    _this.woService.Delete({ WorkOrderSids: [woBase.WorkOrderSid] }).then(function (response) {
+                                                        if (response.Status === 0 && response.Value) {
+                                                            //Notify user of Deleted WO
+                                                            var listMessage = document.createElement('li');
+                                                            listMessage.className = 'list-group-item';
+                                                            listMessage.appendChild(document.createTextNode("Work Order " + response.Value[0] + " Deleted"));
+                                                            _this.clearListElement.appendChild(listMessage);
+                                                        }
+                                                    });
+                                                });
+                                            }
+                                            else {
+                                                //Notify user of Cancelled WO
+                                                var listMessage = document.createElement('li');
+                                                listMessage.className = 'list-group-item';
+                                                listMessage.appendChild(document.createTextNode("Work Order " + woid + " Cancelled"));
+                                                _this.clearListElement.appendChild(listMessage);
+                                            }
                                         });
                                     }
                                     else {
-                                        //Notify user of Cancelled WO
+                                        //notify user of Closed work order
                                         var listMessage = document.createElement('li');
                                         listMessage.className = 'list-group-item';
-                                        listMessage.appendChild(document.createTextNode("Work Order " + woid + " Cancelled"));
+                                        listMessage.appendChild(document.createTextNode("Work Order " + woid + " Closed"));
                                         _this.clearListElement.appendChild(listMessage);
                                     }
                                 });
-                            }
-                            else {
-                                //notify user of Closed work order
-                                var listMessage = document.createElement('li');
-                                listMessage.className = 'list-group-item';
-                                listMessage.appendChild(document.createTextNode("Work Order " + woid + " Closed"));
-                                _this.clearListElement.appendChild(listMessage);
                             }
                         });
                     });
@@ -94,38 +98,43 @@ define(["require", "exports", '../typescript/api/services/General/Authentication
                 });
                 _this.inspService.Search({ Status: inspStatusArray }).then(function (response) {
                     response.Value.forEach(function (inspId) {
-                        // Try to Close
-                        _this.inspService.Close({ InspectionIds: [inspId] }).then(function (response) {
-                            if (response.Status !== 0 || response.ErrorMessages.length > 0) {
-                                // Cancel instead
-                                _this.inspService.Cancel({ InspectionIds: [inspId], CancelReason: "Cleaning house", DateCancelled: new Date() }).then(function (response) {
-                                    if (response.Status !== 0) {
-                                        //Delete
-                                        _this.inspService.Delete({ InspectionIds: [inspId] }).then(function (response) {
-                                            if (response.Status === 0) {
-                                                //Notify user of Deleted Inspection
+                        // Set recurring to never
+                        _this.inspService.Update({ InspectionId: inspId, CycleType: '0' }).then(function (response) {
+                            if (response.Value.CycleType === Core.Enums.RepeatType.NEVER) {
+                                // Try to Close
+                                _this.inspService.Close({ InspectionIds: [inspId] }).then(function (response) {
+                                    if (response.Status !== 0 || response.ErrorMessages.length > 0) {
+                                        // Cancel instead
+                                        _this.inspService.Cancel({ InspectionIds: [inspId], CancelReason: "Cleaning house", DateCancelled: new Date() }).then(function (response) {
+                                            if (response.Status !== 0) {
+                                                //Delete
+                                                _this.inspService.Delete({ InspectionIds: [inspId] }).then(function (response) {
+                                                    if (response.Status === 0) {
+                                                        //Notify user of Deleted Inspection
+                                                        var listMessage = document.createElement('li');
+                                                        listMessage.className = 'list-group-item';
+                                                        listMessage.appendChild(document.createTextNode("Inspection " + inspId + " Deleted"));
+                                                        _this.clearListElement.appendChild(listMessage);
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                //Notify user of Cancelled Inspection
                                                 var listMessage = document.createElement('li');
                                                 listMessage.className = 'list-group-item';
-                                                listMessage.appendChild(document.createTextNode("Inspection " + inspId + " Deleted"));
+                                                listMessage.appendChild(document.createTextNode("Inspection " + inspId + " Cancelled"));
                                                 _this.clearListElement.appendChild(listMessage);
                                             }
                                         });
                                     }
                                     else {
-                                        //Notify user of Cancelled Inspection
+                                        //Notify user of Closed Inspection
                                         var listMessage = document.createElement('li');
                                         listMessage.className = 'list-group-item';
-                                        listMessage.appendChild(document.createTextNode("Inspection " + inspId + " Cancelled"));
+                                        listMessage.appendChild(document.createTextNode("Inspection " + inspId + " Closed"));
                                         _this.clearListElement.appendChild(listMessage);
                                     }
                                 });
-                            }
-                            else {
-                                //Notify user of Closed Inspection
-                                var listMessage = document.createElement('li');
-                                listMessage.className = 'list-group-item';
-                                listMessage.appendChild(document.createTextNode("Inspection " + inspId + " Closed"));
-                                _this.clearListElement.appendChild(listMessage);
                             }
                         });
                     });
